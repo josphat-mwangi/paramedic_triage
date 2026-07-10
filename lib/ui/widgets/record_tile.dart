@@ -1,0 +1,75 @@
+import 'package:flutter/material.dart';
+
+import '../../domain/triage_record.dart';
+import '../theme/hazard_colors.dart';
+import 'sync_status_badge.dart';
+
+class RecordTile extends StatelessWidget {
+  final TriageRecord record;
+  const RecordTile(this.record, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final critical = HazardColors.isCritical(record.priority);
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: critical
+            ? BorderSide(color: HazardColors.background(record.priority), width: 2)
+            : BorderSide.none,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: HazardColors.background(record.priority),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    HazardColors.label(record.priority),
+                    style: TextStyle(
+                      color: HazardColors.onBackground(record.priority),
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                Chip(
+                  label: Text(record.status.label),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(record.patientName,
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 2),
+            Text(record.conditionDescription,
+                style: TextStyle(color: Colors.grey.shade700)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                SyncStatusBadge(record.syncStatus),
+                const Spacer(),
+                if (record.retryCount > 0)
+                  Text('retry ${record.retryCount}',
+                      style: TextStyle(
+                          fontSize: 11, color: Colors.grey.shade600)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

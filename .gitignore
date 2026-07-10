@@ -1,0 +1,16 @@
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+*.iml
+.idea/
+.vscode/
+ios/Pods/
+android/.gradle/
+
+# Docs: keep the repo clean — only README.md is tracked.
+# AGENTS.md and .claude/agents/*.md stay local working docs.
+*.md
+!README.md
