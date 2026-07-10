@@ -22,6 +22,7 @@ class SyncEngine {
 
   StreamSubscription<void>? _onlineSub;
   bool _isSyncing = false;
+  bool _dirty = false;
   Timer? _retryTimer;
 
   SyncEngine({
@@ -38,8 +39,17 @@ class SyncEngine {
   }
 
   /// Drain the outbox once. Safe to call from anywhere, any number of times.
+  ///
+  /// If a call arrives while a drain is already in flight (e.g. a submit
+  /// racing the connectivity listener), it doesn't just no-op: it marks the
+  /// pass "dirty" so the in-flight drain immediately runs one more pass on
+  /// completion. Without this, a record saved mid-drain could sit `pending`
+  /// until the next unrelated trigger (reconnect, resume, manual refresh).
   Future<void> syncPending() async {
-    if (_isSyncing) return;
+    if (_isSyncing) {
+      _dirty = true;
+      return;
+    }
     if (!await connectivity.isOnline) return;
 
     _isSyncing = true;
@@ -57,6 +67,11 @@ class SyncEngine {
       if (scheduleRetry) _scheduleRetry(batch);
     } finally {
       _isSyncing = false;
+    }
+
+    if (_dirty) {
+      _dirty = false;
+      await syncPending();
     }
   }
 
