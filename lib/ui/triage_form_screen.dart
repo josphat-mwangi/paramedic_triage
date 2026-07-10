@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/triage_record.dart';
 import '../domain/triage_validator.dart';
 import '../state/triage_providers.dart';
+import 'theme/app_theme.dart';
 import 'widgets/priority_selector.dart';
 
 class TriageFormScreen extends ConsumerStatefulWidget {
@@ -43,6 +44,12 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
           status: _status,
         );
 
+    // Ask what's actually true right now rather than reciting the same line
+    // regardless of connectivity — a record captured while online starts
+    // uploading immediately, so telling the paramedic to wait for "online"
+    // would be both wrong and needlessly worrying.
+    final online = await ref.read(syncEngineProvider).isOnline;
+
     if (!mounted) return;
     _nameCtrl.clear();
     _conditionCtrl.clear();
@@ -51,50 +58,83 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
       _status = TriageStatus.pending;
       _errors = const TriageValidationResult();
     });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Saved locally · will sync when online'),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: 2),
+      SnackBar(
+        duration: Duration(seconds: online ? 3 : 5),
+        content: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.check_circle, color: AppTheme.teal, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Triage record saved',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(
+                    online
+                        ? 'Syncing to the server now.'
+                        : "Safely stored on this device. It'll sync "
+                            "automatically the moment you're back online — "
+                            "nothing else to do.",
+                    style: const TextStyle(fontSize: 12.5, color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text('New triage record', style: textTheme.headlineSmall),
+          const SizedBox(height: 4),
+          Text('Every field below saves to this device instantly.',
+              style: textTheme.bodyMedium),
+          const SizedBox(height: 24),
+          Text('Patient name', style: textTheme.titleMedium),
+          const SizedBox(height: 8),
           TextField(
             controller: _nameCtrl,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
-              labelText: 'Patient name',
-              border: const OutlineInputBorder(),
+              hintText: 'e.g. Jane Doe',
               errorText: _errors.patientName,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
+          Text('Condition description', style: textTheme.titleMedium),
+          const SizedBox(height: 8),
           TextField(
             controller: _conditionCtrl,
-            minLines: 2,
-            maxLines: 4,
+            minLines: 3,
+            maxLines: 5,
             decoration: InputDecoration(
-              labelText: 'Condition description',
-              border: const OutlineInputBorder(),
+              hintText: 'What do you see — mechanism, symptoms, vitals…',
               errorText: _errors.conditionDescription,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           PrioritySelector(
             selected: _priority,
             onChanged: (p) => setState(() => _priority = p),
             errorText: _errors.priority,
           ),
-          const SizedBox(height: 20),
-          const Text('Status', style: TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 24),
+          Text('Status', style: textTheme.titleMedium),
           const SizedBox(height: 8),
           SegmentedButton<TriageStatus>(
             segments: const [
@@ -106,14 +146,13 @@ class _TriageFormScreenState extends ConsumerState<TriageFormScreen> {
             selected: {_status},
             onSelectionChanged: (s) => setState(() => _status = s.first),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 32),
           FilledButton(
             onPressed: _submit,
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(56),
             ),
-            child: const Text('Submit triage',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            child: const Text('Submit triage'),
           ),
         ],
       ),

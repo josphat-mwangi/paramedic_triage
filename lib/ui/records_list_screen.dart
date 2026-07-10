@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../state/triage_providers.dart';
+import 'theme/app_theme.dart';
 import 'widgets/record_tile.dart';
 
 class RecordsListScreen extends ConsumerWidget {
@@ -13,8 +14,22 @@ class RecordsListScreen extends ConsumerWidget {
 
     if (state.records.isEmpty) {
       return Center(
-        child: Text('No triage records yet',
-            style: TextStyle(color: Colors.grey.shade700)),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.inbox_outlined, size: 40, color: AppTheme.inkMuted),
+              const SizedBox(height: 12),
+              Text('No triage records yet',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 4),
+              Text('Submitted records will appear here.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center),
+            ],
+          ),
+        ),
       );
     }
 
@@ -23,17 +38,20 @@ class RecordsListScreen extends ConsumerWidget {
         if (state.pendingCount > 0)
           Container(
             width: double.infinity,
-            color: Colors.orange.shade50,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: AppTheme.teal.withValues(alpha: 0.10),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
               children: [
-                Icon(Icons.cloud_queue, size: 18, color: Colors.orange.shade900),
+                const Icon(Icons.cloud_queue, size: 18, color: AppTheme.teal),
                 const SizedBox(width: 8),
-                // Deep-orange-900 (not shade900 "orange") — checked against
-                // the shade50 banner background this clears 4.5:1 AA for
-                // normal-weight text; plain orange.shade900 only reaches ~3.5:1.
-                Text('${state.pendingCount} record(s) awaiting sync',
-                    style: TextStyle(color: Colors.deepOrange.shade900)),
+                Expanded(
+                  child: Text(
+                    '${state.pendingCount} record(s) waiting to sync — '
+                    'this happens automatically, no action needed.',
+                    style: const TextStyle(
+                        color: AppTheme.brown, fontWeight: FontWeight.w600),
+                  ),
+                ),
               ],
             ),
           ),
@@ -42,6 +60,7 @@ class RecordsListScreen extends ConsumerWidget {
             onRefresh: () =>
                 ref.read(syncEngineProvider).syncPending(),
             child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: state.records.length,
               itemBuilder: (_, i) => RecordTile(state.records[i]),
             ),

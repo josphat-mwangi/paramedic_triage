@@ -1,13 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/remote/remote_data_source.dart';
 import 'state/triage_providers.dart';
 import 'ui/records_list_screen.dart';
+import 'ui/theme/app_theme.dart';
 import 'ui/triage_form_screen.dart';
 
 class TriageApp extends StatelessWidget {
-  final RemoteDataSource remote; // exposed only so the demo can flip forceFailure
+  final RemoteDataSource remote; // exposed only so the debug menu can flip forceFailure
   const TriageApp({super.key, required this.remote});
 
   @override
@@ -15,10 +17,7 @@ class TriageApp extends StatelessWidget {
     return MaterialApp(
       title: 'Paramedic Triage',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xFFB00020),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
       home: HomeShell(remote: remote),
     );
   }
@@ -56,24 +55,62 @@ class _HomeShellState extends ConsumerState<HomeShell>
     }
   }
 
+  void _openDeveloperOptions(MockRemoteDataSource mock) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, setSheetState) => Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Developer options',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 4),
+              Text(
+                'Debug-only. Forces every simulated upload to fail so you can '
+                'watch the retry/backoff queue in action.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Force uploads to fail'),
+                value: mock.forceFailure,
+                onChanged: (v) => setSheetState(() {
+                  setState(() => mock.forceFailure = v);
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mock = widget.remote;
-    final forceFailure = mock is MockRemoteDataSource && mock.forceFailure;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Paramedic Triage'),
         actions: [
-          if (mock is MockRemoteDataSource)
-            Row(
-              children: [
-                const Text('Force fail', style: TextStyle(fontSize: 12)),
-                Switch(
-                  value: forceFailure,
-                  onChanged: (v) => setState(() => mock.forceFailure = v),
-                ),
-              ],
+          // Debug-only escape hatch to demo the retry/backoff path — never
+          // shown in a release build, and tucked behind an icon rather than a
+          // switch sitting in the primary chrome.
+          if (kDebugMode && mock is MockRemoteDataSource)
+            IconButton(
+              tooltip: 'Developer options',
+              icon: Icon(
+                Icons.bug_report_outlined,
+                color: mock.forceFailure
+                    ? Theme.of(context).colorScheme.error
+                    : null,
+              ),
+              onPressed: () => _openDeveloperOptions(mock),
             ),
         ],
       ),

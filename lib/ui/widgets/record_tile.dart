@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/triage_record.dart';
+import '../theme/app_theme.dart';
 import '../theme/hazard_colors.dart';
 import 'sync_status_badge.dart';
 
@@ -12,12 +13,12 @@ class RecordTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final critical = HazardColors.isCritical(record.priority);
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         side: critical
             ? BorderSide(color: HazardColors.background(record.priority), width: 2)
-            : BorderSide.none,
+            : const BorderSide(color: AppTheme.hairline),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -52,10 +53,10 @@ class RecordTile extends StatelessWidget {
             const SizedBox(height: 8),
             Text(record.patientName,
                 style: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.w600)),
+                    fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.ink)),
             const SizedBox(height: 2),
             Text(record.conditionDescription,
-                style: TextStyle(color: Colors.grey.shade700)),
+                style: const TextStyle(color: AppTheme.inkMuted)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -63,8 +64,8 @@ class RecordTile extends StatelessWidget {
                 const Spacer(),
                 if (record.retryCount > 0)
                   Text('retry ${record.retryCount}',
-                      style: TextStyle(
-                          fontSize: 11, color: Colors.grey.shade600)),
+                      style: const TextStyle(
+                          fontSize: 11, color: AppTheme.inkMuted)),
               ],
             ),
             if (record.syncStatus == SyncStatus.failed &&

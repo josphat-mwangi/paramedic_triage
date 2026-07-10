@@ -10,6 +10,13 @@ pubspec.lock
 ios/Pods/
 android/.gradle/
 
+# Mobile-only assessment (Android/iOS) — desktop/web scaffolding from a
+# `flutter create .` re-run without --platforms is not part of this project.
+/linux/
+/macos/
+/web/
+/windows/
+
 # Docs: keep the repo clean — only README.md is tracked.
 # AGENTS.md and .claude/agents/*.md stay local working docs.
 *.md

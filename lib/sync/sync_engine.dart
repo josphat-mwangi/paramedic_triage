@@ -31,6 +31,11 @@ class SyncEngine {
     BackoffPolicy? backoff,
   }) : backoff = backoff ?? BackoffPolicy();
 
+  /// Exposed so the UI can phrase its post-submit confirmation honestly
+  /// instead of always claiming "will sync when online" — a record captured
+  /// while already online starts uploading immediately, not eventually.
+  Future<bool> get isOnline => connectivity.isOnline;
+
   /// Begin listening for network restoration. Also kicks an initial drain in
   /// case records were captured while the app was closed and offline.
   void start() {
