@@ -8,12 +8,21 @@ class SyncStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (IconData icon, Color color, String label, bool spin) =
+    // `iconColor` is the brighter brand hue (fine for a non-text glyph, which
+    // only needs 3:1 under WCAG 1.4.11). `textColor` is a darkened variant of
+    // the same hue chosen to clear the 4.5:1 AA text-contrast threshold at
+    // this label's 12px bold size — plain Colors.orange/blue/green/red read
+    // as low as ~2.2:1 on a white card, which fails outright.
+    final (IconData icon, Color iconColor, Color textColor, String label, bool spin) =
         switch (status) {
-      SyncStatus.pending => (Icons.schedule, Colors.orange, 'Pending sync', false),
-      SyncStatus.syncing => (Icons.sync, Colors.blue, 'Syncing…', true),
-      SyncStatus.synced => (Icons.cloud_done, Colors.green, 'Synced', false),
-      SyncStatus.failed => (Icons.error_outline, Colors.red, 'Failed', false),
+      SyncStatus.pending => (Icons.schedule, Colors.orange,
+          const Color(0xFFBF360C), 'Pending sync', false),
+      SyncStatus.syncing => (Icons.sync, Colors.blue, Colors.blue.shade900,
+          'Syncing…', true),
+      SyncStatus.synced => (Icons.cloud_done, Colors.green,
+          Colors.green.shade900, 'Synced', false),
+      SyncStatus.failed => (Icons.error_outline, Colors.red,
+          Colors.red.shade900, 'Failed', false),
     };
 
     final iconWidget = spin
@@ -22,7 +31,7 @@ class SyncStatusBadge extends StatelessWidget {
             height: 14,
             child: CircularProgressIndicator(strokeWidth: 2),
           )
-        : Icon(icon, size: 16, color: color);
+        : Icon(icon, size: 16, color: iconColor);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -31,7 +40,7 @@ class SyncStatusBadge extends StatelessWidget {
         const SizedBox(width: 6),
         Text(label,
             style: TextStyle(
-                color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+                color: textColor, fontSize: 12, fontWeight: FontWeight.w600)),
       ],
     );
   }

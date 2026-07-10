@@ -12,9 +12,9 @@ class RecordsListScreen extends ConsumerWidget {
     final state = ref.watch(triageNotifierProvider);
 
     if (state.records.isEmpty) {
-      return const Center(
+      return Center(
         child: Text('No triage records yet',
-            style: TextStyle(color: Colors.grey)),
+            style: TextStyle(color: Colors.grey.shade700)),
       );
     }
 
@@ -27,10 +27,13 @@ class RecordsListScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                Icon(Icons.cloud_queue, size: 18, color: Colors.orange.shade800),
+                Icon(Icons.cloud_queue, size: 18, color: Colors.orange.shade900),
                 const SizedBox(width: 8),
+                // Deep-orange-900 (not shade900 "orange") — checked against
+                // the shade50 banner background this clears 4.5:1 AA for
+                // normal-weight text; plain orange.shade900 only reaches ~3.5:1.
                 Text('${state.pendingCount} record(s) awaiting sync',
-                    style: TextStyle(color: Colors.orange.shade900)),
+                    style: TextStyle(color: Colors.deepOrange.shade900)),
               ],
             ),
           ),

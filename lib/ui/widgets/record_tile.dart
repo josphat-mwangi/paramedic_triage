@@ -67,6 +67,36 @@ class RecordTile extends StatelessWidget {
                           fontSize: 11, color: Colors.grey.shade600)),
               ],
             ),
+            if (record.syncStatus == SyncStatus.failed &&
+                record.lastError != null &&
+                record.lastError!.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.warning_amber_rounded,
+                        size: 16, color: Colors.red.shade800),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        record.lastError!,
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.red.shade900),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
