@@ -90,7 +90,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField).first, 'Jane Doe');
     await tester.enterText(find.byType(TextField).last, 'Chest pain');
-    await tester.tap(find.text('P1 · CRITICAL'));
+    await tester.tap(find.byKey(const ValueKey('priority-chip-1')));
     await tester.ensureVisible(find.text('Submit triage'));
     await tester.tap(find.text('Submit triage'));
     // Elapse past the background sync's zero-latency Future.delayed so it
@@ -107,7 +107,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField).first, 'Jane Doe');
     await tester.enterText(find.byType(TextField).last, 'Chest pain');
-    await tester.tap(find.text('P1 · CRITICAL'));
+    await tester.tap(find.byKey(const ValueKey('priority-chip-1')));
     await tester.ensureVisible(find.text('Submit triage'));
     await tester.tap(find.text('Submit triage'));
     // Elapse past the background sync's zero-latency Future.delayed so it

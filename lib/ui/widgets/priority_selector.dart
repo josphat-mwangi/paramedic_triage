@@ -25,22 +25,49 @@ class PrioritySelector extends StatelessWidget {
         Text('1 is life-threatening — pick the level that fits now.',
             style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 10),
-        Column(
+        Row(
           children: [
             for (var p = 1; p <= 5; p++)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _PriorityCard(
-                  priority: p,
-                  isSelected: selected == p,
-                  onTap: () => onChanged(p),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: p < 5 ? 8 : 0),
+                  child: _PriorityChip(
+                    priority: p,
+                    isSelected: selected == p,
+                    onTap: () => onChanged(p),
+                  ),
                 ),
               ),
           ],
         ),
+        const SizedBox(height: 10),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 150),
+          child: selected != null
+              ? Row(
+                  key: ValueKey(selected),
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: HazardColors.background(selected!),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      HazardColors.label(selected!),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, color: AppTheme.ink),
+                    ),
+                  ],
+                )
+              : const SizedBox(key: ValueKey('none'), height: 0),
+        ),
         if (errorText != null)
           Padding(
-            padding: const EdgeInsets.only(top: 2, left: 4),
+            padding: const EdgeInsets.only(top: 6, left: 4),
             child: Text(errorText!,
                 style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
           ),
@@ -49,12 +76,12 @@ class PrioritySelector extends StatelessWidget {
   }
 }
 
-class _PriorityCard extends StatelessWidget {
+class _PriorityChip extends StatelessWidget {
   final int priority;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _PriorityCard({
+  const _PriorityChip({
     required this.priority,
     required this.isSelected,
     required this.onTap,
@@ -64,50 +91,39 @@ class _PriorityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final hazard = HazardColors.background(priority);
     return GestureDetector(
+      key: ValueKey('priority-chip-$priority'),
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        height: 52,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected ? hazard.withValues(alpha: 0.10) : AppTheme.surface,
-          borderRadius: BorderRadius.circular(14),
+          color: hazard,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? hazard : AppTheme.hairline,
-            width: isSelected ? 1.6 : 1,
+            color: isSelected ? AppTheme.ink : Colors.transparent,
+            width: 2.5,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: hazard.withValues(alpha: 0.45),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: hazard,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$priority',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: HazardColors.onBackground(priority),
-                ),
-              ),
+        child: Opacity(
+          opacity: isSelected ? 1 : 0.55,
+          child: Text(
+            '$priority',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: HazardColors.onBackground(priority),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                HazardColors.label(priority),
-                style: const TextStyle(
-                    fontWeight: FontWeight.w700, color: AppTheme.ink),
-              ),
-            ),
-            Icon(
-              isSelected ? Icons.check_circle : Icons.circle_outlined,
-              color: isSelected ? hazard : AppTheme.hairline,
-            ),
-          ],
+          ),
         ),
       ),
     );

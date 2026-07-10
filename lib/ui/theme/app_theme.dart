@@ -95,15 +95,22 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
-        indicatorColor: teal.withValues(alpha: 0.14),
+        indicatorColor: teal.withValues(alpha: 0.16),
+        indicatorShape: const StadiumBorder(),
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        labelTextStyle: WidgetStateProperty.resolveWith((states) => TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: states.contains(WidgetState.selected) ? teal : inkMuted,
-            )),
+        height: 64,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+            color: selected ? teal : inkMuted,
+          );
+        }),
         iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
               color: states.contains(WidgetState.selected) ? teal : inkMuted,
+              size: 24,
             )),
       ),
       snackBarTheme: SnackBarThemeData(

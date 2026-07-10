@@ -18,9 +18,21 @@ class TriageApp extends StatelessWidget {
       title: 'Paramedic Triage',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
+      scrollBehavior: const _CalmScrollBehavior(),
       home: HomeShell(remote: remote),
     );
   }
+}
+
+/// Swaps the rubbery iOS-style bounce and Android stretch overscroll for a
+/// firm clamp — a paramedic tapping through a form under stress shouldn't
+/// feel the screen wobble past its limits.
+class _CalmScrollBehavior extends MaterialScrollBehavior {
+  const _CalmScrollBehavior();
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) =>
+      const ClampingScrollPhysics();
 }
 
 /// Hosts the lifecycle observer so a resume opportunistically drains the queue.
@@ -118,15 +130,26 @@ class _HomeShellState extends ConsumerState<HomeShell>
         index: _tab,
         children: const [TriageFormScreen(), RecordsListScreen()],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tab,
-        onDestinationSelected: (i) => setState(() => _tab = i),
-        destinations: const [
-          NavigationDestination(
-              icon: Icon(Icons.add_box_outlined), label: 'Intake'),
-          NavigationDestination(
-              icon: Icon(Icons.list_alt), label: 'Queue'),
-        ],
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AppTheme.hairline)),
+        ),
+        child: NavigationBar(
+          selectedIndex: _tab,
+          onDestinationSelected: (i) => setState(() => _tab = i),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.add_box_outlined),
+              selectedIcon: Icon(Icons.add_box),
+              label: 'Intake',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.list_alt_outlined),
+              selectedIcon: Icon(Icons.list_alt),
+              label: 'Queue',
+            ),
+          ],
+        ),
       ),
     );
   }
